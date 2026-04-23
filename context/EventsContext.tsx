@@ -12,6 +12,8 @@ export interface AppEvent {
 
 interface EventsContextType {
   events: AppEvent[];
+  isSyncing: boolean;
+  error: string | null;
   addEvent: (event: Omit<AppEvent, "id" | "timestamp">) => void;
 }
 
@@ -19,6 +21,8 @@ const EventsContext = createContext<EventsContextType | undefined>(undefined);
 
 export const EventsProvider = ({ children }: { children: React.ReactNode }) => {
   const [events, setEvents] = useState<AppEvent[]>([]);
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const addEvent = (event: Omit<AppEvent, "id" | "timestamp">) => {
     const newEvent: AppEvent = {
@@ -34,7 +38,7 @@ export const EventsProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   return (
-    <EventsContext.Provider value={{ events, addEvent }}>
+    <EventsContext.Provider value={{ events, isSyncing, error, addEvent }}>
       {children}
     </EventsContext.Provider>
   );

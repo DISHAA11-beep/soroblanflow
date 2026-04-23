@@ -18,7 +18,7 @@ export default function Home() {
   const { events, addEvent } = useEventsContext();
   const { swap, addLiquidity, isLoading: isProcessing } = useSoroban();
   
-  const [activeTab, setActiveTab] = useState<"swap" | "liquidity">("swap");
+  const [activeTab, setActiveTab] = useState<"swap" | "liquidity" | "governance">("swap");
   const [amount, setAmount] = useState("");
   const [balances, setBalances] = useState({ xlm: "---", lqid: "---" });
   const [isFetchingBalances, setIsFetchingBalances] = useState(false);
@@ -32,7 +32,7 @@ export default function Home() {
       const horizon = new StellarSdk.Horizon.Server("https://horizon-testnet.stellar.org");
       const account = await horizon.loadAccount(address);
       const xlmVal = account.balances.find(b => b.asset_type === "native")?.balance || "0.00";
-      const lqidVal = account.balances.find(b => b.asset_code === "LQID")?.balance || "0.00";
+      const lqidVal = account.balances.find(b => 'asset_code' in b && b.asset_code === "LQID")?.balance || "0.00";
       setBalances({ 
         xlm: parseFloat(xlmVal).toLocaleString(undefined, { minimumFractionDigits: 2 }), 
         lqid: parseFloat(lqidVal).toLocaleString(undefined, { minimumFractionDigits: 2 })

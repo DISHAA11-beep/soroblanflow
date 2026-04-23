@@ -10,7 +10,7 @@ export const useSorobanEvents = () => {
     isSyncing, 
     error,
     // Add custom filter logic if needed
-    swapEvents: events.filter(e => e.type === 'SWAP'),
-    liquidityEvents: events.filter(e => e.type === 'LIQUIDITY')
+    swapEvents: events.filter(e => e.type === 'swap'),
+    liquidityEvents: events.filter(e => e.type === 'liquidity')
   };
 };
