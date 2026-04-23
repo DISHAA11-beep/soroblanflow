@@ -85,7 +85,7 @@ export default function Header() {
         </div>
       </div>
 
-      {/* Mobile Menu (Optional but helpful) */}
+      {/* Mobile Menu */}
       {isMenuOpen && (
         <div className="md:hidden pt-4 pb-2 flex flex-col space-y-3 border-t border-gray-50 mt-4">
           {["Swap", "Liquidity", "Governance"].map((link) => (
@@ -94,6 +94,8 @@ export default function Header() {
               href={`#${link.toLowerCase()}`} 
               className="text-sm font-medium text-gray-500 hover:text-black"
               onClick={() => setIsMenuOpen(false)}
+            >
+              {link}
             </a>
           ))}
           {/* Mobile Utility Actions */}
