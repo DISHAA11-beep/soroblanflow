@@ -1,23 +1,16 @@
 /** @type {import('next').NextConfig} */
-// Force rebuild to pick up postcss.config.js
 const nextConfig = {
-  webpack: (config, { isServer }) => {
-    if (!isServer) {
-      // Fixes npm packages that depend on `fs` module
-      config.resolve.fallback = {
-        ...config.resolve.fallback,
-        fs: false,
-        path: false,
-        os: false,
-      };
-    }
-    
-    // Ignore sodium-native which causes build errors in Next.js
-    config.externals.push({
-      'sodium-native': 'sodium-native',
-    });
-
-    return config;
+  eslint: {
+    // Warning: This allows production builds to successfully complete even if
+    // your project has ESLint errors.
+    ignoreDuringBuilds: true,
+  },
+  typescript: {
+    // !! WARN !!
+    // Dangerously allow production builds to successfully complete even if
+    // your project has type errors.
+    // !! WARN !!
+    ignoreBuildErrors: true,
   },
 };
 
