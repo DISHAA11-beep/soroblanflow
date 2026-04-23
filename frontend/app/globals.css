@@ -2,50 +2,126 @@
 @tailwind components;
 @tailwind utilities;
 
+/* SorobanFlow Premium Light Theme */
 :root {
-  --background: #ffffff;
-  --foreground: #0f172a;
-  --card-bg: rgba(248, 250, 252, 0.8);
-  --card-border: rgba(226, 232, 240, 0.8);
+  --background: #FFFFFF;
+  --foreground: #0F172A;
+  --blue: #1E40AF; /* Royal Blue */
+  --blue-soft: #EFF6FF;
+  --blue-border: rgba(30, 64, 175, 0.08);
+  --muted: #64748B;
+  --card-bg: rgba(255, 255, 255, 0.7);
+  --card-border: rgba(0, 0, 0, 0.05);
+  --radius-card: 32px;
+  --radius-btn: 16px;
+  --shadow-glass: 0 8px 32px rgba(0, 0, 0, 0.04);
+  --shadow-hover: 0 20px 40px rgba(0, 0, 0, 0.08);
 }
 
-[data-theme='dark'] {
+[data-theme="dark"] {
   --background: #020617;
-  --foreground: #f8fafc;
-  --card-bg: rgba(30, 41, 59, 0.4);
-  --card-border: rgba(255, 255, 255, 0.1);
+  --foreground: #F8FAFC;
+  --card-bg: rgba(15, 23, 42, 0.7);
+  --card-border: rgba(255, 255, 255, 0.05);
+  --muted: #94A3B8;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
 body {
+  font-family: 'Inter', -apple-system, sans-serif;
+  background-color: var(--background);
+  background-image: 
+    radial-gradient(circle at 0% 0%, rgba(30, 64, 175, 0.03) 0%, transparent 50%),
+    radial-gradient(circle at 100% 100%, rgba(30, 64, 175, 0.03) 0%, transparent 50%);
+  background-attachment: fixed;
   color: var(--foreground);
-  background: var(--background);
-  transition: background-color 0.3s ease, color 0.3s ease;
   min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
 }
 
-@layer components {
-  .glass-card {
-    @apply backdrop-blur-md border rounded-2xl p-4 md:p-6 shadow-sm transition-all;
-    background: var(--card-bg);
-    border-color: var(--card-border);
-  }
-
-  .btn-primary {
-    @apply bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 md:px-6 rounded-xl transition-all active:scale-95 disabled:opacity-50 disabled:pointer-events-none;
-  }
-
-  .input-field {
-    @apply w-full bg-white/5 dark:bg-black/20 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all;
-  }
+.glass-card {
+  background: var(--card-bg);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-glass);
+  transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
-/* Scrollbar styling */
-::-webkit-scrollbar {
-  width: 6px;
+.glass-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-hover);
+  border-color: rgba(30, 64, 175, 0.1);
 }
-::-webkit-scrollbar-track {
-  background: transparent;
+
+.btn-primary {
+  background: var(--blue);
+  color: white;
+  border: none;
+  border-radius: var(--radius-btn);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 16px 32px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(30, 64, 175, 0.2);
 }
-::-webkit-scrollbar-thumb {
-  @apply bg-slate-300 dark:bg-slate-700 rounded-full;
+
+.btn-primary:hover {
+  transform: scale(1.02);
+  box-shadow: 0 8px 24px rgba(30, 64, 175, 0.3);
+  filter: brightness(1.1);
+}
+
+.btn-secondary {
+  background: var(--blue-soft);
+  color: var(--blue);
+  border: 1px solid var(--blue-border);
+  border-radius: var(--radius-btn);
+  font-weight: 700;
+  padding: 12px 24px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-secondary:hover {
+  background: white;
+  border-color: var(--blue);
+}
+
+.input-field {
+  background: rgba(0, 0, 0, 0.03);
+  border: 1px solid transparent;
+  border-radius: 12px;
+  padding: 16px;
+  width: 100%;
+  font-weight: 600;
+  font-size: 1.125rem;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.input-field:focus {
+  background: white;
+  border-color: var(--blue);
+  box-shadow: 0 0 0 4px rgba(30, 64, 175, 0.05);
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.skeleton {
+  background: linear-gradient(90deg, rgba(0,0,0,0.03) 25%, rgba(0,0,0,0.06) 50%, rgba(0,0,0,0.03) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite linear;
+  border-radius: 8px;
 }
