@@ -19,32 +19,59 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   const [error, setError] = useState<string | null>(null);
 
   const connect = useCallback(async () => {
+    console.log("WalletContext: Starting connection process...");
     setIsConnecting(true);
     setError(null);
+    
     try {
-      const freighter = (window as any).freighter;
-      
-      let result = "";
-      try {
-        if (freighter && freighter.requestAccess) {
-          result = await freighter.requestAccess();
-        } else {
-          result = await getPublicKey();
-        }
-      } catch (e) {
-        if (await isConnected()) result = await getPublicKey();
+      // 1. Check if Freighter is even installed
+      console.log("WalletContext: Checking if Freighter is connected...");
+      const connected = await isConnected();
+      console.log("WalletContext: isConnected result:", connected);
+
+      if (!connected) {
+        throw new Error("Freighter wallet not found. Please install the extension.");
       }
 
-      const publicKey = Array.isArray(result) ? result[0] : result;
+      // 2. Try to get public key
+      console.log("WalletContext: Requesting public key...");
+      let publicKey = "";
+      
+      try {
+        // Prefer the direct window object if available as it's often more reliable in prod
+        const freighter = (window as any).freighter;
+        if (freighter && freighter.getPublicKey) {
+          console.log("WalletContext: Using window.freighter.getPublicKey");
+          publicKey = await freighter.getPublicKey();
+        } else {
+          console.log("WalletContext: Using @stellar/freighter-api getPublicKey");
+          publicKey = await getPublicKey();
+        }
+      } catch (getPkErr: any) {
+        console.warn("WalletContext: getPublicKey failed, trying fallback...", getPkErr);
+        // Fallback: If they haven't shared access yet, request it
+        const freighter = (window as any).freighter;
+        if (freighter && freighter.requestAccess) {
+          const result = await freighter.requestAccess();
+          publicKey = Array.isArray(result) ? result[0] : result;
+        } else {
+          throw getPkErr;
+        }
+      }
+
+      console.log("WalletContext: Received public key:", publicKey);
 
       if (publicKey && typeof publicKey === "string" && publicKey.length > 5) {
         setAddress(publicKey);
+        console.log("WalletContext: Successfully connected to:", publicKey);
       } else {
-        setError("Connection failed: No public key shared. Please open Freighter and approve the request.");
+        throw new Error("No public key returned from Freighter.");
       }
     } catch (err: any) {
-      setError(err.message || "Failed to connect to wallet.");
+      const msg = err.message || "Failed to connect to wallet.";
+      setError(msg);
       console.error("WalletContext: Connection error:", err);
+      alert(msg); // Provide immediate visual feedback for the user
     } finally {
       setIsConnecting(false);
     }
@@ -61,13 +88,14 @@ export function WalletProvider({ children }: { children: ReactNode }) {
           }
         }
       } catch (e) {
-        // Ignore
+        // Ignore auto-connect failures
       }
     };
     checkConnection();
   }, []);
 
   const disconnect = useCallback(() => {
+    console.log("WalletContext: Disconnecting wallet...");
     setAddress(null);
   }, []);
 

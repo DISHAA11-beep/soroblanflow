@@ -12,7 +12,7 @@ interface SwapInterfaceProps {
   isProcessing: boolean;
   onAction: () => void;
   onConnect: () => void;
-  address?: string;
+  address?: string | null;
   xlmBalance: string;
   lqidBalance: string;
   swapDirection: "xlm-to-lqid" | "lqid-to-xlm";
@@ -47,8 +47,13 @@ export default function SwapInterface({
     setAmount(safe.toString());
   };
 
+  const handleConnectClick = () => {
+    console.log("SwapInterface: Connect Wallet clicked");
+    onConnect();
+  };
+
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex flex-col gap-6">
+    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex flex-col gap-6 relative z-10">
       {/* Tabs */}
       <div className="flex space-x-6 border-b border-gray-100 mb-2">
         {["swap", "liquidity"].map((tab) => (
@@ -123,9 +128,9 @@ export default function SwapInterface({
 
       {/* Action Button */}
       <button 
-        onClick={address ? onAction : onConnect}
+        onClick={address ? onAction : handleConnectClick}
         disabled={isProcessing}
-        className="w-full py-3 bg-blue-600 text-white font-bold rounded-xl shadow-lg hover:bg-blue-700 active:scale-[0.98] transition-all flex items-center justify-center gap-2 uppercase tracking-wide disabled:opacity-50"
+        className="w-full py-3 bg-blue-600 text-white font-bold rounded-xl shadow-lg hover:bg-blue-700 active:scale-[0.98] transition-all flex items-center justify-center gap-2 uppercase tracking-wide disabled:opacity-50 relative z-20 cursor-pointer"
       >
         {isProcessing && <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />}
         {isProcessing ? "Processing..." : address ? (activeTab === "swap" ? "SWAP ASSETS" : "ADD LIQUIDITY") : "CONNECT WALLET"}

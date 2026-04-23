@@ -15,6 +15,15 @@ export default function Header() {
 
   const toggleTheme = () => setTheme(theme === "light" ? "dark" : "light");
 
+  const handleConnect = async () => {
+    console.log("Header: handleConnect called");
+    try {
+      await connect();
+    } catch (e) {
+      console.error("Header: connect failed", e);
+    }
+  };
+
   return (
     <nav className="w-full border-b border-gray-100 bg-white px-6 py-4">
       <div className="max-w-[1400px] mx-auto flex justify-between items-center">
@@ -41,11 +50,11 @@ export default function Header() {
 
         {/* Right Side: Actions */}
         <div className="flex items-center space-x-2">
-          {/* Wallet Button - Compact on mobile */}
+          {/* Wallet Button */}
           <button 
-            onClick={!address ? connect : undefined}
+            onClick={address ? undefined : handleConnect}
             disabled={isConnecting}
-            className="flex items-center gap-2 px-3 py-1.5 border border-gray-200 rounded-lg text-[10px] sm:text-xs font-bold text-gray-600 hover:bg-gray-50 transition-all"
+            className="flex items-center gap-2 px-3 py-1.5 border border-gray-200 rounded-lg text-[10px] sm:text-xs font-bold text-gray-600 hover:bg-gray-50 transition-all cursor-pointer relative z-50"
           >
             <Wallet size={12} />
             <span className="hidden sm:inline">
@@ -56,7 +65,7 @@ export default function Header() {
             </span>
           </button>
 
-          {/* Theme Toggle - Hidden on extra small mobile */}
+          {/* Theme Toggle */}
           <button 
             onClick={toggleTheme}
             className="hidden sm:flex p-1.5 border border-gray-200 rounded-lg text-gray-500 hover:bg-gray-50 transition-all"
@@ -64,7 +73,7 @@ export default function Header() {
             {theme === "light" ? <Sun size={14} /> : <Moon size={14} />}
           </button>
 
-          {/* Disconnect Button - Hidden on mobile */}
+          {/* Disconnect Button */}
           {address && (
             <button 
               onClick={disconnect}
