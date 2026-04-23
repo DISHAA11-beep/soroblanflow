@@ -11,32 +11,25 @@ export const useSoroban = () => {
   const [error, setError] = useState<string | null>(null);
 
   const swap = async (amount: string, address: string) => {
-    // Dynamically resolve pool address from storage or env
-    const poolId = localStorage.getItem("soroban_pool_id") || process.env.NEXT_PUBLIC_POOL_ADDRESS || "";
-    
-    console.log("useSoroban: swap started", { amount, address, poolId });
-    
-    if (!poolId || poolId.length < 5) {
-      console.error("useSoroban: poolId is missing!");
-      throw new Error("Pool address not configured. Click CONFIG and paste your Contract ID.");
-    }
-    
+    console.log("useSoroban: swap() triggered", { amount, address });
     setIsLoading(true);
     setError(null);
+    
     try {
-      const server = new StellarSdk.SorobanRpc.Server(RPC_URL);
       const networkPassphrase = StellarSdk.Networks.TESTNET;
+      const horizonUrl = "https://horizon-testnet.stellar.org";
       
-      console.log("useSoroban: Loading account...");
-      const account = await server.getLatestLedger().then(() => 
-        new StellarSdk.Horizon.Server("https://horizon-testnet.stellar.org").loadAccount(address)
-      );
+      console.log("useSoroban: Loading account from Horizon...");
+      const horizon = new StellarSdk.Horizon.Server(horizonUrl);
+      const account = await horizon.loadAccount(address);
+      console.log("useSoroban: Account loaded, sequence:", account.sequenceNumber());
       
       const lqidAsset = new StellarSdk.Asset("LQID", "GCDAND5QSCVFFEDUCK62VEZASVPYOUATCMJ4EXAUVEOUPILOJDDEFUTZ");
       
+      console.log("useSoroban: Building transaction...");
       const op = StellarSdk.Operation.pathPaymentStrictSend({
         sendAsset: StellarSdk.Asset.native(),
-        sendAmount: amount.toString(),
+        sendAmount: amount,
         destAsset: lqidAsset,
         destMin: "0.0000001",
         destination: address,
@@ -44,46 +37,49 @@ export const useSoroban = () => {
       });
 
       const tx = new StellarSdk.TransactionBuilder(account, {
-        fee: "1000",
+        fee: "10000", // Increased fee for faster processing
         networkPassphrase,
       })
         .addOperation(op)
         .setTimeout(StellarSdk.TimeoutInfinite)
         .build();
 
-      console.log("useSoroban: Requesting signature...");
-      // Freighter v2+ requires networkPassphrase and returns an object
-      const result = await signTransaction(tx.toXDR(), { 
-        networkPassphrase: StellarSdk.Networks.TESTNET 
-      });
+      const xdr = tx.toXDR();
+      console.log("useSoroban: Transaction built. Requesting Freighter signature...");
       
-      const signedXdr = typeof result === 'string' ? result : (result as any).signedTxXdr;
-      console.log("useSoroban: Transaction signed!", !!signedXdr);
+      // Use direct window check for max reliability
+      let result: any;
+      const f = (window as any).freighter;
+      if (f && f.signTransaction) {
+        console.log("useSoroban: Using window.freighter.signTransaction");
+        result = await f.signTransaction(xdr, { networkPassphrase });
+      } else {
+        console.log("useSoroban: Using @stellar/freighter-api signTransaction");
+        result = await signTransaction(xdr, { networkPassphrase });
+      }
 
-      if (!signedXdr) throw new Error("User rejected signature or signing failed.");
-      
-      const horizon = new StellarSdk.Horizon.Server("https://horizon-testnet.stellar.org");
+      console.log("useSoroban: signTransaction raw result:", result);
+      const signedXdr = typeof result === 'string' ? result : result?.signedTxXdr;
+
+      if (!signedXdr) {
+        throw new Error("Transaction signature was not returned. Did you cancel the request?");
+      }
+
+      console.log("useSoroban: Submitting to network...");
       const submission = await horizon.submitTransaction(StellarSdk.TransactionBuilder.fromXDR(signedXdr, networkPassphrase) as any);
-      console.log("useSoroban: Submission successful:", submission.successful);
-      
+      console.log("useSoroban: Final submission result:", submission);
+
       if (!submission.successful) {
-        throw new Error(`Transaction failed: ${submission.hash}`);
+        throw new Error(`Submission failed. Hash: ${submission.hash}`);
       }
 
       return { success: true, txHash: submission.hash };
     } catch (err: any) {
-      console.error("useSoroban: CRITICAL ERROR:", err);
-      let errorMsg = err.message || "Swap failed";
-      
-      if (err.response && err.response.data && err.response.data.extras) {
-        const codes = err.response.data.extras.result_codes;
-        if (codes) {
-          errorMsg = `Transaction rejected: ${codes.transaction || ""} ${codes.operations ? codes.operations.join(", ") : ""}`;
-        }
-      }
-      
-      setError(errorMsg);
-      throw new Error(errorMsg);
+      console.error("useSoroban: ERROR", err);
+      const msg = err.message || "Swap failed";
+      setError(msg);
+      alert("SWAP ERROR: " + msg);
+      throw err;
     } finally {
       setIsLoading(false);
     }

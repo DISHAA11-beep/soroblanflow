@@ -91,7 +91,11 @@ export default function Home() {
   }, [amount, swapDirection]);
 
   const handleAction = async () => {
-    if (!address || !amount) return;
+    console.log("page.tsx: handleAction triggered", { address, amount, activeTab });
+    if (!address || !amount) {
+      console.warn("page.tsx: handleAction aborted - missing address or amount");
+      return;
+    }
     try {
       if (activeTab === "swap") {
         // Note: useSoroban hook might need update to handle direction, 
