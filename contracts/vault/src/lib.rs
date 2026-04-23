@@ -1,8 +1,8 @@
 #![no_std]
-use soroban_sdk::{contract, contracterror, contractimpl, contractimport, symbol_short, Address, Env, log};
+use soroban_sdk::{contract, contracterror, contractimpl, symbol_short, Address, Env, log};
 
 mod token {
-    soroban_sdk::contractimport!(file = "../../target/wasm32-unknown-unknown/release/token.wasm");
+    soroban_sdk::contractimport!(file = "../../target/wasm32v1-none/release/token.wasm");
 }
 
 #[contracterror]
@@ -43,9 +43,9 @@ impl PoolContract {
                 env.events().publish((symbol_short!("swap_ok"), from), amount);
                 Ok(())
             },
-            Ok(Err(token_err)) => {
+            Ok(Err(_token_err)) => {
                 // Token contract returned a logical error (e.g., InsufficientBalance)
-                log!(&env, "Token transfer failed with code: {:?}", token_err);
+                // log!(&env, "Token transfer failed with code: {:?}", _token_err);
                 Err(PoolError::TokenCallFailed)
             },
             Err(_) => {
