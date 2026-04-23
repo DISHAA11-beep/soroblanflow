@@ -1,7 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, useCallback, useEffect, ReactNode } from "react";
-import { isConnected, getPublicKey, requestAccess } from "@stellar/freighter-api";
+import * as Freighter from "@stellar/freighter-api";
 
 interface WalletContextType {
   address: string | null;
@@ -19,78 +19,72 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   const [error, setError] = useState<string | null>(null);
 
   const connect = useCallback(async () => {
-    console.log("WalletContext: connect triggered");
+    console.log("WalletContext V3: Connect Clicked");
     setIsConnecting(true);
     setError(null);
     
     try {
-      // 1. Check if Freighter is available
-      const freighterAvailable = await isConnected();
-      console.log("WalletContext: Freighter detected:", freighterAvailable);
+      // Direct access to window.freighter is often most reliable for debugging
+      const freighter = (window as any).freighter;
+      console.log("WalletContext V3: window.freighter available:", !!freighter);
 
-      if (!freighterAvailable) {
-        throw new Error("Freighter wallet not found or not responding. Please ensure it is installed and unlocked.");
-      }
-
-      // 2. Request Access / Get Public Key
-      console.log("WalletContext: Requesting access...");
       let pk = "";
-      
-      try {
-        // First, try requestAccess (Modern pattern)
-        const accessResult = await requestAccess();
-        console.log("WalletContext: requestAccess result:", accessResult);
-        
-        if (Array.isArray(accessResult) && accessResult.length > 0) {
-          pk = accessResult[0];
-        } else if (typeof accessResult === "string" && accessResult.length > 10) {
-          pk = accessResult;
-        }
 
-        // If requestAccess didn't return a key, try getPublicKey
-        if (!pk) {
-          console.log("WalletContext: No key from requestAccess, trying getPublicKey...");
-          pk = await getPublicKey();
-        }
-      } catch (innerErr: any) {
-        console.warn("WalletContext: Primary connection failed, trying fallback...", innerErr);
-        // Fallback: Direct window object
-        const freighter = (window as any).freighter;
-        if (freighter && freighter.getPublicKey) {
-          pk = await freighter.getPublicKey();
-        } else {
-          throw innerErr;
+      // 1. Try modern requestAccess
+      console.log("WalletContext V3: Calling Freighter.requestAccess()...");
+      try {
+        const result = await Freighter.requestAccess();
+        console.log("WalletContext V3: requestAccess result:", result);
+        if (Array.isArray(result)) pk = result[0];
+        else if (typeof result === "string") pk = result;
+      } catch (e) {
+        console.warn("WalletContext V3: requestAccess failed:", e);
+      }
+
+      // 2. Fallback to getPublicKey
+      if (!pk) {
+        console.log("WalletContext V3: Calling Freighter.getPublicKey()...");
+        try {
+          pk = await Freighter.getPublicKey();
+          console.log("WalletContext V3: getPublicKey result:", pk);
+        } catch (e) {
+          console.warn("WalletContext V3: getPublicKey failed:", e);
         }
       }
 
-      console.log("WalletContext: Final PK:", pk);
+      // 3. Fallback to direct window.freighter
+      if (!pk && freighter && freighter.getPublicKey) {
+        console.log("WalletContext V3: Calling window.freighter.getPublicKey()...");
+        pk = await freighter.getPublicKey();
+        console.log("WalletContext V3: window.freighter result:", pk);
+      }
 
-      if (pk && pk.startsWith("G") && pk.length === 56) {
+      if (pk && pk.length === 56 && pk.startsWith("G")) {
+        console.log("WalletContext V3: Success setting address:", pk);
         setAddress(pk);
-        console.log("WalletContext: Success!");
       } else {
-        throw new Error("Invalid or missing public key. Please unlock Freighter and approve the request.");
+        throw new Error("Could not retrieve a valid Stellar address. Please ensure Freighter is unlocked and authorized.");
       }
     } catch (err: any) {
-      console.error("WalletContext: Error:", err);
-      const msg = err.message || "Failed to connect to wallet.";
+      console.error("WalletContext V3: Final Error:", err);
+      const msg = err.message || "Connection failed";
       setError(msg);
-      alert(msg);
+      alert("SOROBANFLOW ERROR: " + msg);
     } finally {
       setIsConnecting(false);
     }
   }, []);
 
   useEffect(() => {
-    const checkAuto = async () => {
+    const auto = async () => {
       try {
-        if (await isConnected()) {
-          const pk = await getPublicKey();
+        if (await Freighter.isConnected()) {
+          const pk = await Freighter.getPublicKey();
           if (pk && pk.length === 56) setAddress(pk);
         }
       } catch (e) {}
     };
-    checkAuto();
+    auto();
   }, []);
 
   const disconnect = useCallback(() => {
