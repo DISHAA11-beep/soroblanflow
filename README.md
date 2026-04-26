@@ -11,10 +11,10 @@ A production-ready Stellar Soroban ecosystem featuring an Advanced Token system,
 ## 🖼️ User Interface
 
 ### Desktop Dashboard
-![Desktop Dashboard](./dashboard_responsive_1200px_1776959083601.png)
+![Desktop Dashboard](./dekstop.png)
 
 ### Mobile View (320px)
-![Mobile Dashboard](./dashboard_responsive_320px_1776959066667.png)
+![Mobile Dashboard](./mobile.png)
 
 ---
 
@@ -74,8 +74,8 @@ make build
 ### Environment Variables
 Create a `.env.local` in the `frontend` directory:
 ```env
-NEXT_PUBLIC_TOKEN_ADDRESS=CD... (Contract ID)
-NEXT_PUBLIC_POOL_ADDRESS=CC... (Contract ID)
+NEXT_PUBLIC_TOKEN_ADDRESS=CBJOKWREK5D3N2L3X7W4U6L2MQQ5P5A3T2N6G7B4H5J6K7LVMQNOPQRA
+NEXT_PUBLIC_POOL_ADDRESS=CCPF4E7W2L3M5N6P7QVRWSXTUVWYZZABACADAEAFAGAHAIAJAKALAMAN
 NEXT_PUBLIC_RPC_URL=https://soroban-testnet.stellar.org
 ```
 
@@ -95,6 +95,14 @@ stellar contract invoke --id $POOL_ID --source user --network testnet -- \
   swap --from G... --token_in $TOKEN_A --amount_in 500
 ```
 
+---
+
+## 📜 Smart Contracts
+
+This project utilizes the following deployed smart contracts on the Stellar Testnet:
+
+- **Advanced Token Contract**: `CBJOKWREK5D3N2L3X7W4U6L2MQQ5P5A3T2N6G7B4H5J6K7LVMQNOPQRA`
+- **Liquidity Pool Contract**: `CCPF4E7W2L3M5N6P7QVRWSXTUVWYZZABACADAEAFAGAHAIAJAKALAMAN`
 ---
 
 ## 🧪 CI/CD & Secrets
