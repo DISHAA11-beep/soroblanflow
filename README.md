@@ -1,6 +1,6 @@
 # 🚀 SorobanFlow Engine
 
-![CI/CD Status](https://github.com/stellar/antigravity/actions/workflows/ci.yml/badge.svg)
+![CI/CD Status](https://github.com/DISHAA11-beep/soroblanflow/actions/workflows/ci.yml/badge.svg)
 ![Stellar Testnet](https://img.shields.io/badge/Network-Stellar%20Testnet-blue)
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
 
