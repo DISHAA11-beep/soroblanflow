@@ -57,3 +57,73 @@ impl TokenContract {
         env.storage().instance().get(&symbol_short!("supply")).unwrap_or(0)
     }
 }
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use soroban_sdk::{testutils::Address as _, Env};
+
+    #[test]
+    fn test_mint() {
+        let env = Env::default();
+        let contract_id = env.register(TokenContract, ());
+        let client = TokenContractClient::new(&env, &contract_id);
+
+        let user = Address::generate(&env);
+        client.mint(&user, &1000);
+
+        assert_eq!(client.balance_of(&user), 1000);
+        assert_eq!(client.total_supply(), 1000);
+    }
+
+    #[test]
+    fn test_transfer() {
+        let env = Env::default();
+        env.mock_all_auths();
+        let contract_id = env.register(TokenContract, ());
+        let client = TokenContractClient::new(&env, &contract_id);
+
+        let from = Address::generate(&env);
+        let to = Address::generate(&env);
+
+        client.mint(&from, &1000);
+        client.transfer(&from, &to, &600);
+
+        assert_eq!(client.balance_of(&from), 400);
+        assert_eq!(client.balance_of(&to), 600);
+        assert_eq!(client.total_supply(), 1000);
+    }
+
+    #[test]
+    fn test_transfer_insufficient_balance() {
+        let env = Env::default();
+        env.mock_all_auths();
+        let contract_id = env.register(TokenContract, ());
+        let client = TokenContractClient::new(&env, &contract_id);
+
+        let from = Address::generate(&env);
+        let to = Address::generate(&env);
+
+        client.mint(&from, &100);
+        let result = client.try_transfer(&from, &to, &200);
+        
+        // In Soroban v25, contract errors in try_ methods return Err(InvokeError)
+        assert!(result.is_err(), "Transfer should fail with insufficient balance");
+    }
+
+    #[test]
+    fn test_transfer_invalid_amount() {
+        let env = Env::default();
+        env.mock_all_auths();
+        let contract_id = env.register(TokenContract, ());
+        let client = TokenContractClient::new(&env, &contract_id);
+
+        let from = Address::generate(&env);
+        let to = Address::generate(&env);
+
+        client.mint(&from, &1000);
+        let result = client.try_transfer(&from, &to, &-1);
+        
+        assert!(result.is_err(), "Transfer should fail with invalid amount");
+    }
+}

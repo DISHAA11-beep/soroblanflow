@@ -1,10 +1,9 @@
-# 🚀 SorobanFlow Engine
+# 🌊 SorobanFlow
 
-![CI/CD Status](https://github.com/DISHAA11-beep/soroblanflow/actions/workflows/ci.yml/badge.svg)
-![Stellar Testnet](https://img.shields.io/badge/Network-Stellar%20Testnet-blue)
-![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
+[![Live Demo](https://img.shields.io/badge/demo-live-blue?style=for-the-badge)](https://soroblanflow.vercel.app)
+[![GitHub](https://img.shields.io/badge/github-repo-black?style=for-the-badge)](https://github.com/DISHAA11-beep/soroblanflow)
 
-A production-ready Stellar Soroban ecosystem featuring an Advanced Token system, a Liquidity Pool AMM, and a premium Next.js dashboard.
+**SorobanFlow** is a next-generation decentralized ecosystem built on the **Stellar Soroban** network. It combines a high-performance AMM engine with a secure, supply-guarded token framework and a premium dashboard for seamless asset management.
 
 ---
 
@@ -15,6 +14,9 @@ A production-ready Stellar Soroban ecosystem featuring an Advanced Token system,
 
 ### Mobile View (320px)
 ![Mobile Dashboard](./mobile.png)
+
+### Video Walkthrough
+![SorobanFlow Demo](./demo.gif)
 
 ---
 
@@ -38,8 +40,8 @@ A production-ready Stellar Soroban ecosystem featuring an Advanced Token system,
 
 ### 2. Clone and Install
 ```bash
-git clone https://github.com/user/antigravity-soroban.git
-cd antigravity-soroban
+git clone https://github.com/DISHAA11-beep/soroblanflow.git
+cd soroblanflow
 npm install # Installs frontend dependencies
 ```
 
@@ -47,6 +49,14 @@ npm install # Installs frontend dependencies
 ```bash
 make build
 ```
+
+### 4. Run Tests
+The project includes comprehensive unit and integration tests for both smart contracts.
+```bash
+make test
+```
+*   **Token Tests**: Covers minting, secure transfers, and supply logic.
+*   **Vault Tests**: Covers AMM swap logic, initialization, and error propagation from Token contract.
 
 ---
 

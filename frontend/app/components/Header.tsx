@@ -30,17 +30,20 @@ export default function Header() {
         
         {/* Left Side: Logo */}
         <div className="flex items-center">
-          <h1 className="text-xl font-bold tracking-tight text-black">
-            SOROBANFLOW V4
-          </h1>
+          <a href="/" className="text-xl font-black tracking-tight text-black hover:text-blue-600 transition-colors">
+            SOROBAN<span className="text-blue-600">FLOW</span>
+          </a>
         </div>
 
         {/* Middle: Navigation */}
         <div className="hidden md:flex items-center space-x-6">
+          <a href="/dashboard" className="text-sm font-bold text-blue-600 px-3 py-1 bg-blue-50 rounded-lg">
+            Dashboard
+          </a>
           {["Swap", "Liquidity", "Governance"].map((link) => (
             <a 
               key={link} 
-              href={`#${link.toLowerCase()}`} 
+              href={`/dashboard#${link.toLowerCase()}`} 
               className="text-sm font-medium text-gray-500 hover:text-black transition-colors"
             >
               {link}
@@ -97,10 +100,17 @@ export default function Header() {
       {/* Mobile Menu */}
       {isMenuOpen && (
         <div className="md:hidden pt-4 pb-2 flex flex-col space-y-3 border-t border-gray-50 mt-4">
+          <a 
+            href="/dashboard" 
+            className="text-sm font-bold text-blue-600"
+            onClick={() => setIsMenuOpen(false)}
+          >
+            Dashboard
+          </a>
           {["Swap", "Liquidity", "Governance"].map((link) => (
             <a 
               key={link} 
-              href={`#${link.toLowerCase()}`} 
+              href={`/dashboard#${link.toLowerCase()}`} 
               className="text-sm font-medium text-gray-500 hover:text-black"
               onClick={() => setIsMenuOpen(false)}
             >

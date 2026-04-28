@@ -62,3 +62,74 @@ impl PoolContract {
         Ok(client.balance_of(&env.current_contract_address()))
     }
 }
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use soroban_sdk::{testutils::Address as _, Env};
+
+    // Since we are using contractimport!, we need to make sure the wasm file exists
+    // and we can register it using the generated WASM bytes or by registering the contract type if we had access to it.
+    // In this case, token::WASM is available.
+
+    #[test]
+    fn test_vault_swap() {
+        let env = Env::default();
+        env.mock_all_auths();
+
+        // 1. Register Token contract from WASM
+        let token_id = env.register(token::WASM, ());
+        let token_client = token::Client::new(&env, &token_id);
+
+        // 2. Register Vault contract
+        let vault_id = env.register(PoolContract, ());
+        let vault_client = PoolContractClient::new(&env, &vault_id);
+
+        // 3. Initialize Vault
+        vault_client.init(&token_id);
+
+        // 4. Setup user and mint tokens
+        let user = Address::generate(&env);
+        token_client.mint(&user, &1000);
+
+        // 5. Perform swap
+        vault_client.swap(&user, &400);
+
+        // 6. Verify balances
+        assert_eq!(token_client.balance_of(&user), 600);
+        assert_eq!(token_client.balance_of(&vault_id), 400);
+        assert_eq!(vault_client.get_pool_balance(), 400);
+    }
+
+    #[test]
+    fn test_swap_insufficient_balance() {
+        let env = Env::default();
+        env.mock_all_auths();
+
+        let token_id = env.register(token::WASM, ());
+        let token_client = token::Client::new(&env, &token_id);
+
+        let vault_id = env.register(PoolContract, ());
+        let vault_client = PoolContractClient::new(&env, &vault_id);
+
+        vault_client.init(&token_id);
+
+        let user = Address::generate(&env);
+        token_client.mint(&user, &100);
+
+        // Try to swap more than balance
+        let result = vault_client.try_swap(&user, &200);
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_not_initialized() {
+        let env = Env::default();
+        let vault_id = env.register(PoolContract, ());
+        let vault_client = PoolContractClient::new(&env, &vault_id);
+
+        let user = Address::generate(&env);
+        let result = vault_client.try_swap(&user, &100);
+        assert!(result.is_err());
+    }
+}
